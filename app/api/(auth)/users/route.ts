@@ -2,7 +2,8 @@ import connect from "@/app/lib/db";
 import user from "@/app/lib/models/users";
 import { NextResponse } from "next/server";
 import { Types } from "mongoose";
-const objectId = require("mongoose").Types.objectId;
+
+const ObjectId = require("mongoose").Types.ObjectId;
 
 export const GET = async () => {
   try {
@@ -36,24 +37,22 @@ export const POST = async (req: Request) => {
 export const PATCH = async (req: Request) => {
   try {
     const body = await req.json();
-    const { userId, newUsername } = body;
+    const { userId, username } = body;
     await connect();
-    if (!userId || !newUsername) {
+    if (!userId || !username) {
       return new NextResponse(
         JSON.stringify({ message: "User ID or username not provided!" }),
         { status: 500 }
       );
     }
-    if (!objectId.Types.isvalid(userId)) {
+    if (!Types.ObjectId.isValid(userId)) {
       return new NextResponse(JSON.stringify({ message: "User ID invalid" }), {
         status: 500,
       });
     }
     const isUserFoundInDB = await user.findOneAndUpdate(
-      {
-        _id: new Types.ObjectId(),
-        username: newUsername,
-      },
+      { _id: new ObjectId(userId) },
+      { username: username },
       { new: true }
     );
 
@@ -86,7 +85,7 @@ export const DELETE = async (req: Request) => {
         { status: 500 }
       );
     }
-    if (!objectId.Types.isvalid(userId)) {
+    if (!Types.ObjectId.isValid(userId)) {
       return new NextResponse(JSON.stringify({ message: "User ID invalid" }), {
         status: 500,
       });
